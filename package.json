@@ -1,6 +1,6 @@
 {
   "name": "@akashbabu/node-dll",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "DLL(doubly linked list) library for javascript projects",
   "sideEffects": false,
   "main": "lib/dll.js",
