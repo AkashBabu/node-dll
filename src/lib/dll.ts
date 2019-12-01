@@ -6,6 +6,7 @@ interface IDLL<T> {
   getHead(): DLLItemType<T>;
   getTail(): DLLItemType<T>;
   shift(): T | undefined;
+  unshift(data: T): void;
   forEach(cb: IIteratorCb<T, any>): void;
   map<U>(cb: IIteratorCb<T, U>): U[];
   push(data: T): DLLItemType<T>;
@@ -50,6 +51,30 @@ export default class DLL<T> implements IDLL<T> {
     this.remove(dllItem);
 
     return dllItem.getValue();
+  }
+
+  /**
+   * Add the given item to the head of
+   * DLL chain
+   *
+   * In other words the new item would
+   * be the new head of the chain
+   *
+   * @returns Same data that was
+   *    used to append to this list
+   */
+  public unshift(data: T) {
+    const currHead = this.getHead();
+    const dllItem = new DLLItem<T>(data, null, currHead);
+    this.head = dllItem;
+
+    if (currHead instanceof DLLItem) {
+      currHead.setPrev(dllItem);
+    } else {
+      this.tail = dllItem;
+    }
+
+    this.length++;
   }
 
   /**

@@ -4,6 +4,7 @@ interface IDLL<T> {
     getHead(): DLLItemType<T>;
     getTail(): DLLItemType<T>;
     shift(): T | undefined;
+    unshift(data: T): void;
     forEach(cb: IIteratorCb<T, any>): void;
     map<U>(cb: IIteratorCb<T, U>): U[];
     push(data: T): DLLItemType<T>;
@@ -33,6 +34,17 @@ export default class DLL<T> implements IDLL<T> {
      *    used to append to this list
      */
     shift(): T | undefined;
+    /**
+     * Add the given item to the head of
+     * DLL chain
+     *
+     * In other words the new item would
+     * be the new head of the chain
+     *
+     * @returns Same data that was
+     *    used to append to this list
+     */
+    unshift(data: T): void;
     /**
      * Iterate through the entire DLL chain
      *

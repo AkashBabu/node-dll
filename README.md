@@ -67,6 +67,22 @@ dll.shift() // => 'test1'
 dll.length // => 1
 ```
 
+
+#### .unshift()
+Add the given item to the head of DLL chain
+
+Example:
+
+```JS
+const dll = new DLL()
+dll.push('test1')
+dll.unshift('test0')
+
+dll.getHead() // => DLLItem<'test1'>
+
+dll.length // => 2
+```
+
 #### .forEach(cb)
 Iterates through the entire DLL chain
 

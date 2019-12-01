@@ -210,4 +210,26 @@ describe('#DLL', () => {
       });
     });
   });
+
+  describe('.unshift()', () => {
+    it('should add the new item to the head of DLL chain', () => {
+      const dll = new DLL<string>();
+
+      dll.push('test1');
+
+      dll.unshift('test0');
+
+      expect((dll.getHead() as DLLItem<string>).getValue()).to.be.eql('test0');
+      expect(dll.length).to.be.eql(2);
+    });
+
+    it('should add a new item even if the DLL chain is empty', () => {
+      const dll = new DLL<string>();
+
+      dll.unshift('test0');
+
+      expect((dll.getHead() as DLLItem<string>).getValue()).to.be.eql('test0');
+      expect(dll.length).to.be.eql(1);
+    });
+  });
 });
