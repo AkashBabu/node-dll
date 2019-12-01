@@ -1,4 +1,4 @@
-# node-dll
+# node-dll [![Coverage Status](https://coveralls.io/repos/github/AkashBabu/node-dll/badge.svg?branch=master)](https://coveralls.io/github/AkashBabu/node-dll?branch=master) [![Build Status](https://travis-ci.com/AkashBabu/node-dll.svg?branch=master)](https://travis-ci.com/AkashBabu/node-dll) [![Maintainability](https://api.codeclimate.com/v1/badges/c7054adbf0195cce8778/maintainability)](https://codeclimate.com/github/AkashBabu/node-dll/maintainability)
 DLL(Doubly linked list) implementation for javascript projects
 
 ## Introduction
