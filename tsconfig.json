@@ -61,9 +61,7 @@
   },
   "include": [
     "src/**/*",
-    "test/**/*",
-    "load/**/*",
-    "typings/**/*"
+    "test/**/*"
   ],
   "exclude": [],
   "compileOnSave": true
