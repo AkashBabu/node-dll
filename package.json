@@ -45,7 +45,6 @@
     "lint:fix",
     "lint",
     "coverage",
-    "tsc:build",
     "build",
     "status"
   ],
