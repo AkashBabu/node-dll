@@ -57,9 +57,6 @@ jspm_packages/
 # next.js build output
 .next
 
-# package lock
-package-lock.json
-
 # VSCode 
 sample.launch.json
 .vscode/
