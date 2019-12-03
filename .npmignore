@@ -14,4 +14,4 @@ ROAD_MAP.md
 rollup.config.js
 tsconfig.json
 tslint.json
-node-dll-1.0.0.tgz
+*.tgz
