@@ -7,9 +7,10 @@ So this library was created with a simple, yet powerful interface for interactin
 
 This library is written in typescript for robust APIs and type support.
 
+Every aspect was desgined and thought carefully to minimize introducing new bugs.
 
 ## Documentation
-API method name has been carefully chosen to nearly match Array methods, such that learning curve is least and adaptability is higher. But a few methods could not have had a different name and we'd to convince ourselves with those method name.
+API method name has been carefully chosen to nearly match Array methods, such that learning curve is least and adaptability is higher. But a few methods couldn't have had a different name and we had to convince ourselves with those method name.
 
 ### API - DLL
 
@@ -26,7 +27,7 @@ Example:
 const dll = new DLL();
 ```
 
-#### .getHead()
+#### .head
 Returns the first item in the list
 
 Example:
@@ -35,10 +36,10 @@ Example:
 const dll = new DLL()
 dll.push('test')
 
-dll.getHead() // => DLLItem<'test'>
+dll.head // => DLLItem<'test'>
 ```
 
-#### .getTail()
+#### .tail
 Returns the last item in the list
 
 Example:
@@ -48,7 +49,7 @@ const dll = new DLL()
 dll.push('test1')
 dll.push('test2')
 
-dll.getTail() // => DLLItem<'test2'>
+dll.tail // => DLLItem<'test2'>
 ```
 
 
@@ -69,7 +70,7 @@ dll.length // => 1
 
 
 #### .unshift()
-Add the given item to the head of DLL chain
+Adds the given item to the head of DLL chain
 
 Example:
 
@@ -119,7 +120,7 @@ console.log(results) // => ['1) test1', '2) test2']
 ```
 
 #### .push(data) 
-Adds the given items to the tail of DLL chain and returns the added item, such that the same can be used to remove the item from the list
+Adds the given item to the tail of DLL chain and returns the added item, such that the same can be used to remove the item from the list
 
 Example:
 
@@ -134,6 +135,23 @@ dll.getHead() // => DLLItem<'test1'>
 dll.remove(item)
 
 dll.length // => 0
+```
+
+#### .appendAfter(dllItem, data) 
+Adds the given item next to the given dllItem in DLL chain and returns the added item, such that the same can be used to remove the item from the list
+
+Example:
+
+```JS
+const dll = new DLL()
+
+const item1 = dll.push('test1')
+dll.push('test3')
+
+const item2 = dll.appendAfter(item1, 'test2')
+item2.data // => 'test2'
+
+dll // => test1 <-> test2 <-> test3 
 ```
 
 #### .remove(dllItem)
@@ -152,6 +170,73 @@ dll.getHead() // => DLLItem<'test1'>
 dll.remove(item) // => true
 
 dll.length // => 0
+```
+
+#### .clear()
+Removes all the items in the DLL chain
+
+Example:
+
+```JS
+const dll = new DLL()
+
+dll.push('test1')
+dll.push('test2')
+
+dll.length // => 2
+
+dll.clear()
+
+dll.length // => 0
+```
+
+### API - DLLItem
+DLLItem has a readonly access to `prev` and `next` properties, this is to ensure that the user doesn't change them by mistake, which can introduce bugs and be very hard to debug.
+
+#### .data
+Set / get data value on the DLLItem via this property
+
+Example:
+```TS
+const dll = new DLL<string>()
+
+const dllItem = dll.push('test')
+
+dllItem.data // => 'test'
+dllItem.data = 'fake'
+
+const head = dll.head
+head.data // => 'test'
+```
+
+#### .prev
+Get prev value on the DLLItem via this property
+
+Example:
+```TS
+const dll = new DLL<string>()
+
+dll.push('test1')
+const dllItem = dll.push('test2')
+
+dllItem.data // => 'test2'
+
+dllItem.prev.data // => 'test1'
+```
+
+#### .next
+Get next value on the DLLItem via this property
+
+Example:
+```TS
+const dll = new DLL<string>()
+
+const dllItem = dll.push('test1')
+dll.push('test2')
+
+dllItem.data // => 'test1'
+
+dllItem.next.data // => 'test2'
 ```
 
 ## Contribution

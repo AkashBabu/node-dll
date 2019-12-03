@@ -1,7 +1,7 @@
 import DLL from './lib/dll';
-import DLLItem from './lib/dllItem';
+import {AccessRestrictedDLLItem} from './lib/dllItemAccessRestrictor';
 
 export {
   DLL,
-  DLLItem,
+  AccessRestrictedDLLItem as DLLItem,
 };

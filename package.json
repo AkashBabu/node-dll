@@ -6,7 +6,7 @@
   "main": "lib/dll.js",
   "unpkg": "dist/dll.js",
   "module": "es/dll.js",
-  "typings": "types/src/index.d.ts",
+  "typings": "types/index.d.ts",
   "scripts": {
     "_test": "cross-env TS_NODE_FILES=true mocha --require ts-node/register test/**/*.spec.ts",
     "_test:exit": "npm run _test -- --exit",
@@ -14,10 +14,12 @@
     "test:dev": "cross-env NODE_ENV=test npm run _test -- -w",
     "test:grep": "cross-env NODE_ENV=test npm run _test -- -g ",
     "coverage": "nyc npm run test",
-    "build": "rollup -c",
     "lint:fix": "tslint --fix --config tslint.json src/index.ts",
     "lint": "tslint --config tslint.json src/index.ts",
     "tsc:build": "tsc",
+    "rollup:build": "rollup -c",
+    "build": "npm run tsc:build && npm run rollup:build",
+    "pack": "npm run build && npm pack",
     "status": "git status",
     "coveralls": "npm run coverage && nyc report --reporter=text-lcov | coveralls"
   },

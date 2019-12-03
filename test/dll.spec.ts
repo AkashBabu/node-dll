@@ -6,19 +6,20 @@ interface T {
 }
 
 describe('#DLL', () => {
-  it('should be able to create a dll', () => {
-    const dll = new DLL();
-    expect(dll).to.have.keys(['head', 'tail', 'length']);
+  it('should be able to create a dll without any errors', () => {
+    expect(() => {
+      new DLL();
+    }).to.not.throw;
   });
 
   describe('.push()', () => {
     it('should be able to push an item', () => {
-      const dll = new DLL();
+      const dll = new DLL<T>();
       dll.push({ name: 'test' });
 
-      const dllItem = dll.getHead();
+      const dllItem = dll.head;
       expect(dllItem).to.exist;
-      expect((dllItem as DLLItem<any>).getValue().name).to.be.eql('test');
+      expect((dllItem as DLLItem<T>).data.name).to.be.eql('test');
     });
 
     it('should be able to push many items', () => {
@@ -39,75 +40,63 @@ describe('#DLL', () => {
       const dllItem = dll.push({ name: 'test' });
 
       expect(dllItem).to.be.an.instanceOf(DLLItem);
-      expect(dllItem.getValue().name).to.be.eql('test');
+      expect(dllItem.data.name).to.be.eql('test');
     });
 
   });
 
   describe('.remove()', () => {
+    let dll: DLL<T>;
+    let items: Array<DLLItem<T>>;
+    const SIZE = 10;
+
+    beforeEach(() => {
+      dll = new DLL<T>();
+      items = [];
+      Array(SIZE).fill(0).forEach((_, i) => {
+        items.push(dll.push({ name: `test${i}` }));
+      });
+    });
+
     it('should return true on successful removal', () => {
-      const dll = new DLL();
       const dllItem = dll.push({ name: 'test' });
 
       expect(dll.remove(dllItem)).to.be.true;
     });
 
     it('should return false, when there are no items to be removed', () => {
-      const dll = new DLL();
-
       expect(dll.remove(null as any)).to.be.false;
     });
 
     it('should be able to remove the first item', () => {
-      const dll = new DLL<T>();
-      const items: Array<DLLItem<T>> = [];
-      const size = 10;
-      Array(size).fill(0).forEach((_, i) => {
-        items.push(dll.push({ name: `test${i}` }));
-      });
-
       expect(dll.remove(items[0])).to.be.true;
 
-      const firstItem = dll.getHead();
-      expect((firstItem as DLLItem<T>).getValue().name).to.be.eql('test1');
-      expect(dll.length).to.be.eql(size - 1);
+      const firstItem = dll.head;
+      expect((firstItem as DLLItem<T>).data.name).to.be.eql('test1');
+      expect(dll.length).to.be.eql(SIZE - 1);
     });
 
     it('should be able to remove the last item', () => {
-      const dll = new DLL<T>();
-      const items: Array<DLLItem<T>> = [];
-      const size = 10;
-      Array(size).fill(0).forEach((_, i) => {
-        items.push(dll.push({ name: `test${i}` }));
-      });
+      expect(dll.remove(items[SIZE - 1])).to.be.true;
 
-      expect(dll.remove(items[size - 1])).to.be.true;
-
-      const lastItem = dll.getTail();
-      expect((lastItem as DLLItem<T>).getValue().name).to.be.eql(`test${(size - 1) - 1}`);
-      expect(dll.length).to.be.eql(size - 1);
+      const lastItem = dll.tail;
+      expect((lastItem as DLLItem<T>).data.name).to.be.eql(`test${(SIZE - 1) - 1}`);
+      expect(dll.length).to.be.eql(SIZE - 1);
     });
 
     it('should be able to remove any item in between first and last item', () => {
-      const dll = new DLL<T>();
-      const items: Array<DLLItem<T>> = [];
-      const size = 10;
-      Array(size).fill(0).forEach((_, i) => {
-        items.push(dll.push({ name: `test${i}` }));
-      });
-
-      const removeIndex = size / 2;
+      const removeIndex = SIZE / 2;
       expect(dll.remove(items[removeIndex])).to.be.true;
 
       dll.forEach(data => {
         expect(data.name).not.to.be.eql(`test${removeIndex}`);
       });
 
-      expect(dll.length).to.be.eql(size - 1);
+      expect(dll.length).to.be.eql(SIZE - 1);
     });
   });
 
-  describe('.getHead()', () => {
+  describe('.head', () => {
     it('should return the first item in the list', () => {
       const dll = new DLL<T>();
       const items: Array<DLLItem<T>> = [];
@@ -116,13 +105,13 @@ describe('#DLL', () => {
         items.push(dll.push({ name: `test${i}` }));
       });
 
-      const firstItem = dll.getHead();
+      const firstItem = dll.head;
       expect(firstItem).to.be.eql(items[0]);
     });
     it('should return null when there are no items in the list', () => {
       const dll = new DLL();
 
-      expect(dll.getHead()).to.be.null;
+      expect(dll.head).to.be.null;
     });
   });
 
@@ -166,18 +155,33 @@ describe('#DLL', () => {
       expect(name).to.be.eql('test0');
       expect(dll.length).to.be.eql(size - 1);
     });
+
     it('should return undefined if the list is empty', () => {
       const dll = new DLL();
 
       expect(dll.shift()).to.be.undefined;
     });
+
+    it('should set the next item as the new head', () => {
+      const dll = new DLL<string>();
+
+      dll.push('test1');
+      dll.push('test2');
+
+      dll.shift();
+
+      expect((dll.head as DLLItem<string>).data).to.be.eql('test2');
+    });
   });
 
   describe('.length', () => {
-    it('should return the current number of items in the list', () => {
-      const dll = new DLL<T>();
+    let dll: DLL<T>;
+    beforeEach(() => {
+      dll = new DLL<T>();
       expect(dll.length).to.be.eql(0);
+    });
 
+    it('should return the current number of items in the list', () => {
       const dllItem1 = dll.push({ name: 'test1' });
       dll.push({ name: 'test2' });
       dll.push({ name: 'test3' });
@@ -189,6 +193,44 @@ describe('#DLL', () => {
 
       dll.shift();
       expect(dll.length).to.be.eql(1);
+    });
+
+    it('should increase the length when a new node is puhsed to the list', () => {
+      dll.push({ name: 'test1' });
+
+      expect(dll.length).to.be.eql(1);
+    });
+
+    it('should increase the length if any node is appendedAfter a given node', () => {
+      dll.push({name: 'test1'});
+      dll.push({name: 'test3'});
+
+      expect(dll.length).to.be.eql(2);
+
+      const head = dll.head as DLLItem<T>;
+
+      dll.appendAfter(head, {name: 'test2'});
+      expect(dll.length).to.be.eql(3);
+    });
+
+    it('should decrease the length if a node is removed from the list', () => {
+      dll.push({name: 'test1'});
+      dll.push({name: 'test2'});
+      dll.push({name: 'test3'});
+      dll.push({name: 'test4'});
+      dll.push({name: 'test5'});
+
+      const head = dll.head as DLLItem<T>;
+      const node3 = (head.next as DLLItem<T>).next as DLLItem<T>;
+      const tail = dll.tail as DLLItem<T>;
+
+      expect(dll.length).to.be.eql(5);
+      dll.remove(head);
+      expect(dll.length).to.be.eql(4);
+      dll.remove(node3);
+      expect(dll.length).to.be.eql(3);
+      dll.remove(tail);
+      expect(dll.length).to.be.eql(2);
     });
   });
 
@@ -219,7 +261,7 @@ describe('#DLL', () => {
 
       dll.unshift('test0');
 
-      expect((dll.getHead() as DLLItem<string>).getValue()).to.be.eql('test0');
+      expect((dll.head as DLLItem<string>).data).to.be.eql('test0');
       expect(dll.length).to.be.eql(2);
     });
 
@@ -228,8 +270,76 @@ describe('#DLL', () => {
 
       dll.unshift('test0');
 
-      expect((dll.getHead() as DLLItem<string>).getValue()).to.be.eql('test0');
+      expect((dll.head as DLLItem<string>).data).to.be.eql('test0');
       expect(dll.length).to.be.eql(1);
+    });
+  });
+
+  describe('.appendAfter()', () => {
+    let dll: DLL<string>;
+
+    beforeEach(() => {
+      dll = new DLL<string>();
+    });
+
+    it('should insert the given data after the given node', () => {
+      const node1 = dll.push('test1');
+      dll.push('test3');
+
+      dll.appendAfter(node1, 'test2');
+
+      // remove the first node
+      dll.shift();
+
+      // second node must be test2
+      const node2 = dll.shift() as string;
+      expect(node2).to.be.eql('test2');
+
+      dll.unshift('test1');
+
+      expect((dll.tail as DLLItem<string>).data).to.be.eql('test3');
+    });
+
+    it('should reset the tail node, if the new node is appended to a tail node', () => {
+      dll.push('test1');
+
+      const node = dll.appendAfter(dll.tail, 'test2');
+      expect(node).to.be.eql(dll.tail);
+    });
+
+    it('should set head and tail node, if tried to append to an empty list', () => {
+      const node = dll.appendAfter(dll.tail, 'test1');
+
+      expect(node).to.be.eql(dll.head);
+      expect(node).to.be.eql(dll.tail);
+    });
+
+    it('should throw if the dll is not empty and null is passed as node', () => {
+      expect(() => {
+        dll.push('test1');
+
+        dll.appendAfter(null, 'tes2');
+      }).to.throw();
+    });
+  });
+
+  describe('.clear()', () => {
+    it('should clear all the elements in the list', () => {
+      const dll = new DLL<string>();
+
+      dll.push('test1');
+      dll.push('test2');
+      dll.push('test3');
+
+      expect(dll.head).not.to.be.null;
+      expect(dll.tail).not.to.be.null;
+      expect(dll.length).to.be.eql(3);
+
+      dll.clear();
+
+      expect(dll.head).to.be.null;
+      expect(dll.tail).to.be.null;
+      expect(dll.length).to.be.eql(0);
     });
   });
 });

@@ -1,39 +1,48 @@
-import DLLItem, {DLLItemType} from './dllItem';
+import DLLItem, { DLLItemType } from './dllItem';
+import DLLItemAccessRestrictor, { AccessRestrictedDLLItem } from './dllItemAccessRestrictor';
 
 type IIteratorCb<T, U> = (data: T, i: number) => U;
 
 interface IDLL<T> {
-  getHead(): DLLItemType<T>;
-  getTail(): DLLItemType<T>;
+  readonly length: number;
+  readonly head: AccessRestrictedDLLItem<T> | null;
+  readonly tail: AccessRestrictedDLLItem<T> | null;
+
   shift(): T | undefined;
   unshift(data: T): void;
   forEach(cb: IIteratorCb<T, any>): void;
   map<U>(cb: IIteratorCb<T, U>): U[];
-  push(data: T): DLLItemType<T>;
-  remove(dllItem: DLLItemType<T>): boolean;
+  push(data: T): AccessRestrictedDLLItem<T>;
+  appendAfter(node: DLLItemType<T> | AccessRestrictedDLLItem<T>, data: T): AccessRestrictedDLLItem<T>;
+  remove(dllItem: AccessRestrictedDLLItem<T> | DLLItem<T>): boolean;
+  clear(): void;
 }
 
-export default class DLL<T> implements IDLL<T> {
-  public length: number = 0;
-  private head: DLLItemType<T> = null;
-  private tail: DLLItemType<T> = null;
+interface IState<T> {
+  length: number;
+  head: DLLItemType<T>;
+  tail: DLLItemType<T>;
+}
 
-  /**
-   * Returns the first item in the list
-   *
-   * @returns first item
-   */
-  public getHead(): DLLItemType<T> {
-    return this.head;
+export default class DLL<T = any> implements IDLL<T> {
+  private state: IState<T> = this.getFreshState();
+
+  private dllItemAccessRestrictor = new DLLItemAccessRestrictor<T>();
+
+  public get head(): AccessRestrictedDLLItem<T> | null {
+    return this.state.head
+      ? this.dllItemAccessRestrictor.revokeAccess(this.state.head)
+      : null;
   }
 
-  /**
-   * Returns the last item in the list
-   *
-   * @returns last item
-   */
-  public getTail(): DLLItemType<T> {
-    return this.tail;
+  public get tail(): AccessRestrictedDLLItem<T> | null {
+    return this.state.tail
+      ? this.dllItemAccessRestrictor.revokeAccess(this.state.tail)
+      : null;
+  }
+
+  public get length(): number {
+    return this.state.length;
   }
 
   /**
@@ -44,13 +53,18 @@ export default class DLL<T> implements IDLL<T> {
    *    used to append to this list
    */
   public shift(): T | undefined {
-    const dllItem = this.getHead();
+    let dllItem = this.state.head;
 
     if (!(dllItem instanceof DLLItem)) return undefined;
 
     this.remove(dllItem);
 
-    return dllItem.getValue();
+    const value = dllItem.data;
+
+    // for gc
+    dllItem = null;
+
+    return value;
   }
 
   /**
@@ -64,38 +78,43 @@ export default class DLL<T> implements IDLL<T> {
    *    used to append to this list
    */
   public unshift(data: T) {
-    const currHead = this.getHead();
+    const currHead = this.state.head;
     const dllItem = new DLLItem<T>(data, null, currHead);
-    this.head = dllItem;
+    this.state.head = dllItem;
 
     if (currHead instanceof DLLItem) {
-      currHead.setPrev(dllItem);
+      currHead.prev = dllItem;
+
+      // if HEAD is not set
+      // then its an empty list
     } else {
-      this.tail = dllItem;
+      this.state.tail = dllItem;
     }
 
-    this.length++;
+    this.state.length++;
   }
 
   /**
    * Iterate through the entire DLL chain
+   * just like Array.forEach()
    *
-   * @param cb
+   * @param cb iterator callback
    */
   public forEach(cb: IIteratorCb<T, void>): void {
-    let dllItem = this.getHead();
-
-    let i = 0;
-    while (dllItem) {
-      cb(dllItem.getValue(), i++);
-
-      dllItem = dllItem.getNext();
-    }
-
-    // gc
-    dllItem = null;
+    this.iterate<void>((dllItem, i) => {
+      cb(dllItem.data, i);
+    });
   }
 
+  /**
+   * Iterates through the entire DLL chain
+   * and returns the result array, just
+   * like Array.map()
+   *
+   * @param cb iterator callback
+   *
+   * @returns the result array just like Array.map()
+   */
   public map<U>(cb: IIteratorCb<T, U>): U[] {
     const mapped: U[] = [];
     this.forEach((value, i): any => {
@@ -114,24 +133,54 @@ export default class DLL<T> implements IDLL<T> {
    *      can be used to remove this item from
    *      DLL
    */
-  public push(data: T): DLLItem<T> {
-    const dllItem = new DLLItem(data, this.tail);
+  public push(data: T): AccessRestrictedDLLItem<T> {
+    return this.appendAfter(this.state.tail, data);
+  }
 
-    if (this.tail instanceof DLLItem) {
-      this.tail.setNext(dllItem);
-
-      // set this item as the new tail
-      this.tail = dllItem;
+  /**
+   * Appends the given value after the
+   * specified node
+   *
+   * @param node Node to append the new item
+   * @param data Value for the new node
+   *
+   * @returns the newly appended node
+   */
+  public appendAfter(
+    accessRestrictedNode: DLLItemType<T> | AccessRestrictedDLLItem<T>,
+    data: T,
+  ): AccessRestrictedDLLItem<T> {
+    let node: DLLItemType<T>;
+    if (accessRestrictedNode === null && this.state.length > 0) {
+      throw new Error('Invalid Node `null`: DLL is not empty, hence can\'t append to the given node');
+    } else if (accessRestrictedNode instanceof AccessRestrictedDLLItem) {
+      node = this.dllItemAccessRestrictor.grantAccess(accessRestrictedNode);
     } else {
-      // if this is the first item in the DLL
-      // then it would be the head and the tail
-      // of DLL
-      this.head = this.tail = dllItem;
+      node = accessRestrictedNode;
     }
 
-    this.length++;
+    const dllItem = new DLLItem(data);
 
-    return dllItem;
+    // if node is null, then it means
+    // that the list is empty
+    if (node === null) {
+      this.state.head = this.state.tail = dllItem;
+    } else {
+      dllItem.prev = node;
+      dllItem.next = node.next;
+      node.next = dllItem;
+
+      // if the node was a tail node
+      // then reset the tail node
+      if (node === this.state.tail) {
+        this.state.tail = dllItem;
+      }
+    }
+
+    this.state.length++;
+
+    return this.dllItemAccessRestrictor.revokeAccess(dllItem);
+
   }
 
   /**
@@ -139,30 +188,66 @@ export default class DLL<T> implements IDLL<T> {
    *
    * @param dllItem
    */
-  public remove(dllItem: DLLItem<T>): boolean {
-    if (!(dllItem instanceof DLLItem)) return false;
+  public remove(accessRestrictedDllItem: AccessRestrictedDLLItem<T> | DLLItem<T>): boolean {
+    let dllItem: DLLItem<T>;
 
-    const prev = dllItem.getPrev();
-    const next = dllItem.getNext();
-    // If it's NOT HEAD
-    if (prev instanceof DLLItem) {
-      prev.setNext(next);
-
-      // If it's HEAD
+    if (accessRestrictedDllItem instanceof AccessRestrictedDLLItem) {
+      dllItem = this.dllItemAccessRestrictor.grantAccess(accessRestrictedDllItem) as DLLItem<T>;
+    } else if (accessRestrictedDllItem instanceof DLLItem) {
+      dllItem = accessRestrictedDllItem;
     } else {
-      this.head = next;
+      return false;
     }
 
-    // If it's NOT TAIL
-    if (next instanceof DLLItem) {
-      next.setPrev(prev);
-
-      // If it's TAIL
+    // Isolate the node from the chain
+    if (dllItem.prev) {
+      dllItem.prev.next = dllItem.next;
     } else {
-      this.tail = prev;
+      // If it's HEAD node
+      this.state.head = dllItem.next;
     }
 
-    this.length--;
+    if (dllItem.next) {
+      dllItem.next.prev = dllItem.prev;
+    } else {
+      // if it's also a TAIL node
+      this.state.tail = dllItem.prev;
+    }
+
+    this.state.length--;
     return true;
+  }
+
+  /**
+   * Clears the DLL chain
+   */
+  public clear(): void {
+    // unlink all the items in the DLL chain
+    // such it will be garbage collected
+    // as no reference between them is found
+    this.iterate<void>((dllItem) => {
+      dllItem.prev = dllItem.next = null;
+    });
+
+    this.state = this.getFreshState();
+  }
+
+  private getFreshState(): IState<T> {
+    return {
+      length: 0,
+      head: null,
+      tail: null,
+    };
+  }
+
+  private iterate<U>(cb: IIteratorCb<DLLItem<T>, U>) {
+    let dllItem = this.state.head;
+
+    let i = 0;
+    while (dllItem) {
+      cb(dllItem, i++);
+
+      dllItem = dllItem.next;
+    }
   }
 }
