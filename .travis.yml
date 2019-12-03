@@ -18,7 +18,6 @@ install:
   - npm i
 
 script:
-  - npm i npm -g
   - npm run lint
   - npm run test
   - npm run build
