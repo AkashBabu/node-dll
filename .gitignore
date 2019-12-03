@@ -61,9 +61,6 @@ jspm_packages/
 sample.launch.json
 .vscode/
 
-# TODO : uncomment the below line after example app is complete
-# built/
-
 .DS_Store
 
 dist/
@@ -72,3 +69,7 @@ build/
 es/
 .cache
 _book/
+
+
+# package-lock.json
+package-lock.json
