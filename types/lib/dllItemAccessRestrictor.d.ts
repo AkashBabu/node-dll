@@ -6,8 +6,8 @@ interface IAccessRestrictedDLLItem<T> {
     __dllItem__: DLLItemType<T>;
 }
 export interface IDLLItemAccessRestrictor<T> {
-    grantAccess(accessRestrictedDllItem: IAccessRestrictedDLLItem<T>): DLLItemType<T>;
-    revokeAccess(dllItem: DLLItem<T>): IAccessRestrictedDLLItem<T>;
+    grantAccess(accessRestrictedDllItem: IAccessRestrictedDLLItem<T>): DLLItem<T>;
+    revokeAccess<U extends DLLItem<T> | null>(dllItem: U): U extends DLLItem<T> ? AccessRestrictedDLLItem<T> : null;
 }
 export default class DLLItemAccessRestrictor<T> implements IDLLItemAccessRestrictor<T> {
     /**
@@ -17,7 +17,7 @@ export default class DLLItemAccessRestrictor<T> implements IDLLItemAccessRestric
      *
      * @returns all access granted dll item
      */
-    grantAccess(accessRestrictedDllItem: AccessRestrictedDLLItem<T>): DLLItemType<T>;
+    grantAccess(accessRestrictedDllItem: AccessRestrictedDLLItem<T>): DLLItem<T>;
     /**
      * Revokes write access to `prev` & `next` properties
      *
@@ -25,7 +25,7 @@ export default class DLLItemAccessRestrictor<T> implements IDLLItemAccessRestric
      *
      * @returns Access restricted dll item
      */
-    revokeAccess(dllItem: DLLItem<T>): AccessRestrictedDLLItem<T>;
+    revokeAccess<U extends DLLItem<T> | null>(dllItem: U): U extends DLLItem<T> ? AccessRestrictedDLLItem<T> : null;
 }
 export declare class AccessRestrictedDLLItem<T> implements IAccessRestrictedDLLItem<T> {
     private dllItem;

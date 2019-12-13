@@ -30,15 +30,11 @@ export default class DLL<T = any> implements IDLL<T> {
   private dllItemAccessRestrictor = new DLLItemAccessRestrictor<T>();
 
   public get head(): AccessRestrictedDLLItem<T> | null {
-    return this.state.head
-      ? this.dllItemAccessRestrictor.revokeAccess(this.state.head)
-      : null;
+    return this.dllItemAccessRestrictor.revokeAccess(this.state.head);
   }
 
   public get tail(): AccessRestrictedDLLItem<T> | null {
-    return this.state.tail
-      ? this.dllItemAccessRestrictor.revokeAccess(this.state.tail)
-      : null;
+    return this.dllItemAccessRestrictor.revokeAccess(this.state.tail);
   }
 
   public get length(): number {
@@ -192,7 +188,7 @@ export default class DLL<T = any> implements IDLL<T> {
     let dllItem: DLLItem<T>;
 
     if (accessRestrictedDllItem instanceof AccessRestrictedDLLItem) {
-      dllItem = this.dllItemAccessRestrictor.grantAccess(accessRestrictedDllItem) as DLLItem<T>;
+      dllItem = this.dllItemAccessRestrictor.grantAccess(accessRestrictedDllItem);
     } else if (accessRestrictedDllItem instanceof DLLItem) {
       dllItem = accessRestrictedDllItem;
     } else {

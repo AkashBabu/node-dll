@@ -1,3 +1,7 @@
+## v2.0.1
+- adds conditional type to AccessRestrictor methods
+- fixes codeClimate issues
+
 ## v2.0.0
 - adds `.appendAfter()` method, which enables the users to add a item anywhere in the DLL chain
 - adds `.clear()` method, which can be used to clear all the items in the list

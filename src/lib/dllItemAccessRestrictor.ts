@@ -8,13 +8,14 @@ interface IAccessRestrictedDLLItem<T> {
 }
 
 export interface IDLLItemAccessRestrictor<T> {
-  grantAccess(accessRestrictedDllItem: IAccessRestrictedDLLItem<T>): DLLItemType<T>;
+  grantAccess(accessRestrictedDllItem: IAccessRestrictedDLLItem<T>): DLLItem<T>;
 
-  revokeAccess(dllItem: DLLItem<T>): IAccessRestrictedDLLItem<T>;
+  revokeAccess<U extends DLLItem<T> | null>(
+    dllItem: U,
+  ): U extends DLLItem<T> ? AccessRestrictedDLLItem<T> : null;
 }
 
 export default class DLLItemAccessRestrictor<T> implements IDLLItemAccessRestrictor<T> {
-
   /**
    * Grants all the access on the given dllItem
    *
@@ -22,7 +23,7 @@ export default class DLLItemAccessRestrictor<T> implements IDLLItemAccessRestric
    *
    * @returns all access granted dll item
    */
-  public grantAccess(accessRestrictedDllItem: AccessRestrictedDLLItem<T>): DLLItemType<T> {
+  public grantAccess(accessRestrictedDllItem: AccessRestrictedDLLItem<T>): DLLItem<T> {
     return accessRestrictedDllItem.__dllItem__;
   }
 
@@ -33,8 +34,12 @@ export default class DLLItemAccessRestrictor<T> implements IDLLItemAccessRestric
    *
    * @returns Access restricted dll item
    */
-  public revokeAccess(dllItem: DLLItem<T>): AccessRestrictedDLLItem<T> {
-    return new AccessRestrictedDLLItem(dllItem);
+  public revokeAccess<U extends DLLItem<T> | null>(
+    dllItem: U,
+  ): U extends DLLItem<T> ? AccessRestrictedDLLItem<T> : null {
+    return (dllItem
+      ? new AccessRestrictedDLLItem(dllItem as DLLItem<T>)
+      : null) as any;
   }
 
 }
@@ -55,15 +60,11 @@ export class AccessRestrictedDLLItem<T> implements IAccessRestrictedDLLItem<T> {
     this.dllItem.data = dt;
   }
 
-  public get prev(): AccessRestrictedDLLItem<T> | null {
-    return this.dllItem.prev
-    ? this.dllItemAccessRestrictor.revokeAccess(this.dllItem.prev)
-    : null;
+  public get prev() {
+    return this.dllItemAccessRestrictor.revokeAccess(this.dllItem.prev);
   }
 
-  public get next(): AccessRestrictedDLLItem<T> | null  {
-    return this.dllItem.next
-    ? this.dllItemAccessRestrictor.revokeAccess(this.dllItem.next)
-    : null;
+  public get next() {
+    return this.dllItemAccessRestrictor.revokeAccess(this.dllItem.next);
   }
 }
