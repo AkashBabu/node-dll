@@ -12,232 +12,109 @@ Every aspect was desgined and thought carefully to minimize introducing new bugs
 ## Documentation
 API method name has been carefully chosen to nearly match Array methods, such that learning curve is least and adaptability is higher. But a few methods couldn't have had a different name and we had to convince ourselves with those method name.
 
-### API - DLL
+## Installation 
 
-```JS
-import {DLL} from 'node-dll';
-```
+> npm i @akashbabu/node-dll -S
 
-#### constructor():   
-This creates a new instance of `DLL`
+## Sample usage
 
-Example:  
+```TS
+import {DLL, DLLItem} from '@akashbabu/node-dll';
 
-```JS
-const dll = new DLL();
-```
+const dll = new DLL<string>();
 
-#### .head
-Returns the first item in the list
+const dllItem: DLLItem<string> = dll.push('foo');
+console.log(dllItem.data) // => foo
 
-Example:
+console.log(dll.length) // => 1
 
-```JS
-const dll = new DLL()
-dll.push('test')
+dll.remove(dllItem)
+console.log(dll.length) // => 0
 
-dll.head // => DLLItem<'test'>
-```
+dll.push('foo')
+dll.unshift('bar')
 
-#### .tail
-Returns the last item in the list
+const headItem = dll.head
+console.log(headItem.data) // => bar
 
-Example:
+const headData = dll.shift()
+console.log(headData) // => bar
 
-```JS
-const dll = new DLL()
-dll.push('test1')
-dll.push('test2')
-
-dll.tail // => DLLItem<'test2'>
-```
-
-
-#### .shift()
-Removes and returns the first item in the list
-
-Example:
-
-```JS
-const dll = new DLL()
-dll.push('test1')
-dll.push('test2')
-
-dll.shift() // => 'test1'
-
-dll.length // => 1
-```
-
-
-#### .unshift()
-Adds the given item to the head of DLL chain
-
-Example:
-
-```JS
-const dll = new DLL()
-dll.push('test1')
-dll.unshift('test0')
-
-dll.getHead() // => DLLItem<'test1'>
-
-dll.length // => 2
-```
-
-#### .forEach(cb)
-Iterates through the entire DLL chain
-
-Example:
-
-```JS
-const dll = new DLL()
-dll.push('test1')
-dll.push('test2')
-
-dll.forEach((data, i) => {
-  console.log(data, i)
-})
-
-// => test1 0
-// => test2 1
-```
-
-#### .map(cb)
-Iterates through the entire DLL chain and returns a resultant array
-
-Example:
-
-```JS
-const dll = new DLL()
-dll.push('test1')
-dll.push('test2')
-
-const results = dll.map((data, i) => {
-  return `${i + 1}) ${data}`;
-})
-
-console.log(results) // => ['1) test1', '2) test2']
-```
-
-#### .push(data) 
-Adds the given item to the tail of DLL chain and returns the added item, such that the same can be used to remove the item from the list
-
-Example:
-
-```JS
-const dll = new DLL()
-
-const item = dll.push('test1')
-
-dll.length // => 1
-dll.getHead() // => DLLItem<'test1'>
-
-dll.remove(item)
-
-dll.length // => 0
-```
-
-#### .appendAfter(dllItem, data) 
-Adds the given item next to the given dllItem in DLL chain and returns the added item, such that the same can be used to remove the item from the list
-
-Example:
-
-```JS
-const dll = new DLL()
-
-const item1 = dll.push('test1')
-dll.push('test3')
-
-const item2 = dll.appendAfter(item1, 'test2')
-item2.data // => 'test2'
-
-dll // => test1 <-> test2 <-> test3 
-```
-
-#### .remove(dllItem)
-Removes the given item from DLL chain and returns true if the removal was successful
-
-Example:
-
-```JS
-const dll = new DLL()
-
-const item = dll.push('test1')
-
-dll.length // => 1
-dll.getHead() // => DLLItem<'test1'>
-
-dll.remove(item) // => true
-
-dll.length // => 0
-```
-
-#### .clear()
-Removes all the items in the DLL chain
-
-Example:
-
-```JS
-const dll = new DLL()
-
-dll.push('test1')
-dll.push('test2')
-
-dll.length // => 2
+console.log(dll.head.data) // => foo
 
 dll.clear()
+console.log(dll.length) // => 0
 
-dll.length // => 0
+const firstItem = dll.push('first')
+dll.push('third')
+
+dll.appendAfter(firstItem, 'second')
+
+dll.forEach((item, i) => {
+  console.log(`${i + 1}) ${item}`);
+})
+// => 1) first
+// => 2) second
+// => 3) third
+
+
+console.log(dll.map((item, i) => `${i + 1}) ${item}`));
+// => ["1) first", "2) second", "3) third"]
+
 ```
+
+### API - DLL
+
+#### new DLL<T>():   
+This creates a new instance of `DLL`.  
+T -> Denotes the type of data being saved in DLL
+
+##### .head: DLLItem<T> | null
+Returns the first item in the list
+
+##### .tail: DLLItem<T> | null
+Returns the last item in the list
+
+##### .length: number
+Returns the length of the list
+
+##### .shift(): T | undefined
+Removes and returns the first item in the list. Returns `undefined` if the list is empty
+
+##### .unshift(data: T): void
+Adds the given item to the head of DLL (same as Array.unshift logic)
+
+##### .forEach(cb: (data: T, i: number) => void): void
+Iterates through the entire DLL
+
+##### .map<U>(cb: (data: T, i: number) => U): U[]
+Iterates through the entire DLL and returns the resultant array.  
+U -> Denotes the return type of `cb`(callback)
+
+##### .push(data: T): DLLItem<T> 
+Adds the given item to the tail of DLL and returns the added item
+
+##### .appendAfter(dllItem: DLLItem<T>, data: T): DLLItem<T> 
+Adds the given data after the given dllItem in DLL and returns the added item
+
+##### .remove(dllItem: DLLItem<T>): boolean
+Removes the given item from DLL and returns true if the removal was successful
+
+##### .clear()
+Removes all the items in the DLL
 
 ### API - DLLItem
-DLLItem has a readonly access to `prev` and `next` properties, this is to ensure that the user doesn't change them by mistake, which can introduce bugs and be very hard to debug.
+DLLItem has a readonly access to `prev` and `next` properties, this is to ensure that the users doesn't change them unintentionally (which can mess up with the entire DLL) and hence less surface for bugs.
 
-#### .data
+##### .data
 Set / get data value on the DLLItem via this property
 
-Example:
-```TS
-const dll = new DLL<string>()
-
-const dllItem = dll.push('test')
-
-dllItem.data // => 'test'
-dllItem.data = 'fake'
-
-const head = dll.head
-head.data // => 'test'
-```
-
-#### .prev
+##### .prev
 Get prev value on the DLLItem via this property
 
-Example:
-```TS
-const dll = new DLL<string>()
-
-dll.push('test1')
-const dllItem = dll.push('test2')
-
-dllItem.data // => 'test2'
-
-dllItem.prev.data // => 'test1'
-```
-
-#### .next
+##### .next
 Get next value on the DLLItem via this property
 
-Example:
-```TS
-const dll = new DLL<string>()
-
-const dllItem = dll.push('test1')
-dll.push('test2')
-
-dllItem.data // => 'test1'
-
-dllItem.next.data // => 'test2'
-```
 
 ## Contribution
 
