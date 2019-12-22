@@ -69,50 +69,50 @@ console.log(dll.map((item, i) => `${i + 1}) ${item}`));
 This creates a new instance of `DLL`.  
 T -> Denotes the type of data being saved in DLL
 
-##### .head: DLLItem<T> | null
+#### .head: DLLItem<T> | null
 Returns the first item in the list
 
-##### .tail: DLLItem<T> | null
+#### .tail: DLLItem<T> | null
 Returns the last item in the list
 
-##### .length: number
+#### .length: number
 Returns the length of the list
 
-##### .shift(): T | undefined
+#### .shift(): T | undefined
 Removes and returns the first item in the list. Returns `undefined` if the list is empty
 
-##### .unshift(data: T): void
+#### .unshift(data: T): void
 Adds the given item to the head of DLL (same as Array.unshift logic)
 
-##### .forEach(cb: (data: T, i: number) => void): void
+#### .forEach(cb: (data: T, i: number) => void): void
 Iterates through the entire DLL
 
-##### .map<U>(cb: (data: T, i: number) => U): U[]
+#### .map<U>(cb: (data: T, i: number) => U): U[]
 Iterates through the entire DLL and returns the resultant array.  
 U -> Denotes the return type of `cb`(callback)
 
-##### .push(data: T): DLLItem<T> 
+#### .push(data: T): DLLItem<T> 
 Adds the given item to the tail of DLL and returns the added item
 
-##### .appendAfter(dllItem: DLLItem<T>, data: T): DLLItem<T> 
+#### .appendAfter(dllItem: DLLItem<T>, data: T): DLLItem<T> 
 Adds the given data after the given dllItem in DLL and returns the added item
 
-##### .remove(dllItem: DLLItem<T>): boolean
+#### .remove(dllItem: DLLItem<T>): boolean
 Removes the given item from DLL and returns true if the removal was successful
 
-##### .clear()
+#### .clear()
 Removes all the items in the DLL
 
 ### API - DLLItem
 DLLItem has a readonly access to `prev` and `next` properties, this is to ensure that the users doesn't change them unintentionally (which can mess up with the entire DLL) and hence less surface for bugs.
 
-##### .data
+#### .data
 Set / get data value on the DLLItem via this property
 
-##### .prev
+#### .prev
 Get prev value on the DLLItem via this property
 
-##### .next
+#### .next
 Get next value on the DLLItem via this property
 
 
